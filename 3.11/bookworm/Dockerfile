@@ -27,6 +27,8 @@ RUN set -eux; \
 ENV GPG_KEY A035C8C19219BA821ECEA86B64E628F8D684696D
 ENV PYTHON_VERSION 3.11.9
 
+ADD https://astral.sh/uv/install.sh /install.sh
+
 RUN set -eux; \
 	\
 	wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz"; \
@@ -70,6 +72,9 @@ RUN set -eux; \
 		python \
 	; \
 	make install; \
+	chmod -R 655 /install.sh; \
+	/install.sh; \
+	rm /install.sh; \
 	\
 # enable GDB to load debugging data: https://github.com/docker-library/python/pull/701
 	bin="$(readlink -ve /usr/local/bin/python3)"; \
@@ -100,30 +105,9 @@ RUN set -eux; \
 		ln -svT "$src" "/usr/local/bin/$dst"; \
 	done
 
-# if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 24.0
-# https://github.com/docker-library/python/issues/365
-ENV PYTHON_SETUPTOOLS_VERSION 65.5.1
-# https://github.com/pypa/get-pip
-ENV PYTHON_GET_PIP_URL https://github.com/pypa/get-pip/raw/dbf0c85f76fb6e1ab42aa672ffca6f0a675d9ee4/public/get-pip.py
-ENV PYTHON_GET_PIP_SHA256 dfe9fd5c28dc98b5ac17979a953ea550cec37ae1b47a5116007395bfacff2ab9
-
 RUN set -eux; \
 	\
-	wget -O get-pip.py "$PYTHON_GET_PIP_URL"; \
-	echo "$PYTHON_GET_PIP_SHA256 *get-pip.py" | sha256sum -c -; \
-	\
-	export PYTHONDONTWRITEBYTECODE=1; \
-	\
-	python get-pip.py \
-		--disable-pip-version-check \
-		--no-cache-dir \
-		--no-compile \
-		"pip==$PYTHON_PIP_VERSION" \
-		"setuptools==$PYTHON_SETUPTOOLS_VERSION" \
-	; \
-	rm -f get-pip.py; \
-	\
-	pip --version
+	export PYTHONDONTWRITEBYTECODE=1
 
+ENV PATH="/root/.cargo/bin/:$PATH"
 CMD ["python3"]

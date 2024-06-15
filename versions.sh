@@ -37,18 +37,6 @@ has_linux_version() {
 	return 0
 }
 
-has_windows_version() {
-	local dir="$1"; shift
-	local dirVersion="$1"; shift
-	local fullVersion="$1"; shift
-
-	if ! wget -q -O /dev/null -o /dev/null --spider "https://www.python.org/ftp/python/$dirVersion/python-$fullVersion-amd64.exe"; then
-		return 1
-	fi
-
-	return 0
-}
-
 for version in "${versions[@]}"; do
 	rcVersion="${version%-rc}"
 	export version rcVersion
@@ -74,7 +62,6 @@ for version in "${versions[@]}"; do
 		} | sort -ruV
 	) )
 	fullVersion=
-	hasWindows=
 	declare -A impossible=()
 	for possible in "${possibles[@]}"; do
 		rcPossible="${possible%%[a-z]*}"
@@ -82,9 +69,6 @@ for version in "${versions[@]}"; do
 		# varnish is great until it isn't (usually the directory listing we scrape below is updated/uncached significantly later than the release being available)
 		if has_linux_version "$version" "$rcPossible" "$possible"; then
 			fullVersion="$possible"
-			if has_windows_version "$version" "$rcPossible" "$possible"; then
-				hasWindows=1
-			fi
 			break
 		fi
 
@@ -103,9 +87,6 @@ for version in "${versions[@]}"; do
 		for possibleVersion in "${possibleVersions[@]}"; do
 			if has_linux_version "$version" "$rcPossible" "$possibleVersion"; then
 				fullVersion="$possibleVersion"
-				if has_windows_version "$version" "$rcPossible" "$possible"; then
-					hasWindows=1
-				fi
 				break
 			fi
 		done
@@ -173,9 +154,9 @@ for version in "${versions[@]}"; do
 
 	# TODO wheelVersion, somehow: https://github.com/docker-library/python/issues/365#issuecomment-914669320
 
-	echo "$version: $fullVersion (pip $pipVersion${setuptoolsVersion:+, setuptools $setuptoolsVersion}${hasWindows:+, windows})"
+	echo "$version: $fullVersion (pip $pipVersion${setuptoolsVersion:+, setuptools $setuptoolsVersion})"
 
-	export fullVersion pipVersion setuptoolsVersion hasWindows
+	export fullVersion pipVersion setuptoolsVersion
 	json="$(jq <<<"$json" -c '
 		.[env.version] = {
 			version: env.fullVersion,
@@ -197,14 +178,7 @@ for version in "${versions[@]}"; do
 					"3.20",
 					"3.19",
 					empty
-				| "alpine" + .),
-				if env.hasWindows != "" then
-					(
-						"ltsc2022",
-						"1809",
-						empty
-					| "windows/windowsservercore-" + .)
-				else empty end
+				| "alpine" + .)
 			],
 		} + if env.setuptoolsVersion != "" then {
 			setuptools: {

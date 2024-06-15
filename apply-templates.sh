@@ -38,21 +38,7 @@ for version; do
 	for dir in "${variants[@]}"; do
 		variant="$(basename "$dir")" # "buster", "windowsservercore-1809", etc
 		export variant
-
-		case "$dir" in
-			windows/*)
-				windowsVariant="${variant%%-*}" # "windowsservercore", "nanoserver"
-				windowsRelease="${variant#$windowsVariant-}" # "ltsc2022", "1809", etc
-				windowsVariant="${windowsVariant#windows}" # "servercore", "nanoserver"
-				export windowsVariant windowsRelease
-				template='Dockerfile-windows.template'
-				;;
-
-			*)
-				template='Dockerfile-linux.template'
-				;;
-		esac
-
+		template='Dockerfile-linux.template'
 		echo "processing $version/$dir ..."
 		mkdir -p "$version/$dir"
 

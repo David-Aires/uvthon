@@ -39,9 +39,7 @@
       "bullseye",
       "slim-bullseye",
       "alpine3.20",
-      "alpine3.19",
-      "windows/windowsservercore-ltsc2022",
-      "windows/windowsservercore-1809"
+      "alpine3.19"
     ],
     "version": "3.11.9"
   },
@@ -60,9 +58,7 @@
       "bullseye",
       "slim-bullseye",
       "alpine3.20",
-      "alpine3.19",
-      "windows/windowsservercore-ltsc2022",
-      "windows/windowsservercore-1809"
+      "alpine3.19"
     ],
     "version": "3.12.4"
   },
@@ -81,9 +77,7 @@
       "bullseye",
       "slim-bullseye",
       "alpine3.20",
-      "alpine3.19",
-      "windows/windowsservercore-ltsc2022",
-      "windows/windowsservercore-1809"
+      "alpine3.19"
     ],
     "version": "3.13.0b2"
   },
