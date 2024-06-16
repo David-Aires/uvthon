@@ -1,12 +1,8 @@
 name: Build and Push Docker Images
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+  push:
 
 jobs:
   build-and-push:
@@ -28,13 +24,13 @@ jobs:
       - name: Build and push Docker images
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_REPO: uvthon
+          DOCKER_REPO: votre_repos  # Remplacez par votre nom de dépôt Docker
         run: |
           for version_dir in */; do
               version=$(basename "${version_dir}")
               for os_dir in "${version_dir}"*/; do
                   os=$(basename "${os_dir}")
                   image_name="${DOCKER_USER}/${DOCKER_REPO}:${version}-${os}"
-                  docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t "${image_name}" "${version}/${os}" --push
+                  docker buildx build --platform=linux/amd64,linux/arm/v7,linux/arm/v6,linux/arm64/v8 -t "${image_name}" "${version}/${os}" --push
               done
           done
